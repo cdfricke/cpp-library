@@ -4,3 +4,13 @@ File: Integrate.h
 Latest Revision: 19-Feb-2024
 Synopsis: Header File for Integration function library
 */
+
+#ifndef INTEGRATE_H
+#define INTEGRATE_H
+
+    namespace integrate {
+
+        
+    }
+
+#endif
