@@ -1,8 +1,8 @@
 /*
 Programmer: Connor Fricke (cd.fricke23@gmail.com)
 File: DSP.h
-Latest Revision: 18-June-2024
-Synopsis: Header File for DSP function library
+Latest Revision: 19-Feb-2024
+Synopsis: Header File for DSP functions
 */
 
 /*
@@ -124,33 +124,6 @@ Synopsis: Header File for DSP function library
                 vector<complex<double>>& output: resulting transformed signal. each value is a complex number with real and imaginary components.
         */
         std::vector<dcomp> DFT(const std::vector<double>& x, const std::vector<int>& k_range);
-
-        /*
-        goertzelFilter_1(const vector<double>&, const int):
-            Performs the 1st - order recursive implementation of a Goertzel Filter for a single integer k-value 
-            of an input signal to calculate X(k) = y[N] where y is the output signal of the filter.
-                y_k[n] = exp(i * 2 * PI * k / N)*y[n-1]
-            @@ parameters:
-                const vector<double>& input: input signal to be passed through the filter
-                const int k: used in the difference equation
-            @@ return:
-                complex<double> out: result of Goertzel filtering on input signal
-        */
-        dcomp goertzel_1(const std::vector<double> &input, const int k);
-
-        /*
-        goertzelFilter_2(const vector<double>&, const int):
-            Performs the 2nd - order recursive implementation of a Goertzel Filter for a single integer k-value
-            of n input signal to calculate X(k) = y[N] where y is the output signal of the filter, and N is the
-            final element in the digital signal.
-                y[n] = x[n] - W_Nk*x[n-1] + 2cos(2PIk/N)*y[n-1] - y[n-2]
-            @@ parameters:
-                const vector<double>& input: input signal to be passed through the filter
-                const int k: used in the difference equation
-            @@ return:
-                complex<double> out: result of Goertzel filtering on input signal
-        */
-        dcomp goertzel_2(const std::vector<double> &input, const int k);
 
         /* 
         goertzel_IIR(const vector<double>&, const int):
