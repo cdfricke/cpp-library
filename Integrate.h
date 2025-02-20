@@ -10,6 +10,7 @@ Synopsis: Header File for Integration function library
 
     namespace integrate {
 
+        double trapezoidal(double (*func)(double), const double a, const double b, const int n);
         
     }
 
