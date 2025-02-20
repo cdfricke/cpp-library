@@ -16,6 +16,9 @@ Synopsis: Header File for Integration function library
         /* Adapted from adapted from Cameron McElfresh */
         /* https://cameron-mcelfresh.medium.com/monte-carlo-integration-313b37157852 */
         double monteCarlo(double (*func)(double), const double a, const double b, const int n);
+
+        /* Adapted from Physics 5810 with Prof. Ralf Bundschuh and Prof. Dick Furnstahl */
+        double simpsons(double (*func)(double), const double a, const double b, const int n);
         
     }
 
