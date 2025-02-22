@@ -36,8 +36,6 @@ double integral::monteCarlo(double (*func)(double), const double a, const double
 	double sum = 0;
 	double randNum, f;
 
-	int iter = 0;
-
     for (int i = 0; i < iterations - 1; i++)
 	{
 		// generate random number within bounds
