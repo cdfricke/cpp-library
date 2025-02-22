@@ -1,11 +1,10 @@
 /*
 Programmer: Connor Fricke (cd.fricke23@gmail.com)
-File: Calculus.h
-Latest Revision: 19-Feb-2024
-Synopsis: Implementation File for Integration functions
+File: Calculus.cpp
+Latest Revision: 20-Feb-2024
+Synopsis: Implementation File for calculus routines
 */
 
-#include <cstdlib>
 #include "Calculus.h"
 
 using namespace calculus;

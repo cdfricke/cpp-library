@@ -8,6 +8,8 @@ Synopsis: Header File for Integration function library
 #ifndef CALCULUS_H
 #define CALCULUS_H
 
+    #include <cstdlib>
+
     namespace calculus::integral {
 
         /* Adapted from Physics 5810 with Prof. Ralf Bundschuh and Prof. Dick Furnstahl */
