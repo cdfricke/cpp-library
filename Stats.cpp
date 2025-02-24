@@ -93,25 +93,4 @@ namespace stats
         }
         return result;
     }
-    std::vector<int> intDistribution(const int dist, const int num_samples, const int min, const int max)
-    {
-        std::vector<int> result(num_samples, 0);
-
-        std::random_device rd;
-        std::mt19937 generator(rd());
-
-        if (dist == UNIFORM) {
-            std::uniform_int_distribution distribution(min, max);
-            for (int i = 0; i < num_samples; i++) {
-                result[i] = distribution(generator);
-            }
-        }
-        else if (dist == GAUSSIAN) {
-            std::normal_distribution<int> distribution(min, max);
-            for (int i = 0; i < num_samples; i++) {
-                result[i] = distribution(generator);
-            }
-        }
-        return result;
-    }
 }
