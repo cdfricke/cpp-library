@@ -9,68 +9,33 @@ Synopsis: Implementation File for statistics routines
 
 namespace stats
 {
-    // 1D and 2D SUM()
-    double sum(std::vector<double> arr)
+    // SUM()
+    template <typename T>
+    T sum(std::vector<T> arr)
     {
-        double sum = 0.0;
-        for (double x : arr) {
+        T sum = 0;
+        for (T& x : arr) {
             sum += x;
         }
         return sum;
     }
-    std::vector<double> sum(std::vector<std::vector<double>> mat, const int axis)
-    {
-        int rows = mat.size();
-        int cols = mat[0].size();
 
-        if (axis == 0) {
-            std::vector<double> sums(cols, 0.0);
-            for (int j = 0; j < cols; j++) {
-                for (int i = 0; i < rows; i++) {
-                    sums[j] += mat[i][j];
-                }
-            }
-            return sums;
+    // MEAN()
+    template <typename T>
+    double mean(std::vector<T> arr) {
+        return sum(arr) / double(arr.size());
+    }
+
+    // STDEV()
+    template <typename T>
+    double stdev(std::vector<T> arr) {
+        double avg = mean(arr);
+        double sum_sqr_res = 0.0;   // sum of squared residuals
+        for (T& x : arr) {
+            sum_sqr_res += (x - avg) * (x - avg);
         }
-        else if (axis == 1) {
-            std::vector<double> sums(rows, 0.0);
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    sums[i] += mat[i][j];
-                }
-            }
-            return sums;
-        }
-        else return {};
+        return sqrt(sum_sqr_res);
     }
-
-    // 1D and 2D MEAN()
-    double mean(std::vector<double> arr) {
-        return sum(arr) / arr.size();
-    }
-    std::vector<double> mean(std::vector<std::vector<double>> mat, const int axis) {
-        int rows = mat.size();
-        int cols = mat[0].size();
-
-        std::vector<double> means = sum(mat, axis);
-        for (double& x : means) {
-            if (axis == 0) {x /= rows;}
-            else if (axis == 1) {x /= cols;}
-        }
-        return means;
-    }
-
-    // 1D and 2D STDEV()
-    double stdev(std::vector<double> arr) {
-        /* TODO : IMPLEMENT */
-        return 0.0;
-    }
-    std::vector<double> stdev(std::vector<std::vector<double>> mat, const int axis) {
-        /* TODO : IMPLEMENT */
-        return {};
-    }
-
-    
 
     /* DISTRIBUTION GENERATORS */
     std::vector<double> realDistribution(const int dist, const int num_samples, const double min, const double max) {
