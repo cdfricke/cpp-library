@@ -12,10 +12,10 @@ Synopsis: Header File for statistics routines
     #include <vector>
     #include <random>
 
-    #define UNIFORM 0
-    #define GAUSSIAN 1
-
     namespace stats {
+        const short int UNIFORM = 0;
+        const short int GAUSSIAN = 1;
+
         // SUM()
         double sum(std::vector<double> arr);
         
