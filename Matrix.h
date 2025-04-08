@@ -20,6 +20,7 @@ Synopsis: Header File for matrix class and routines
             Matrix();
             Matrix(size_t n);
             Matrix(Matrix<T> &A);
+            Matrix(std::initializer_list<std::initializer_list<T>> init);
             ~Matrix();
         // IO
             void show();
@@ -67,6 +68,34 @@ Synopsis: Header File for matrix class and routines
                 {
                     data[i][j] = A.data[i][j];
                 }
+            }
+        }
+
+        template <typename T>
+        Matrix<T>::Matrix(std::initializer_list<std::initializer_list<T>> init) {
+            size_t rows = init.size();
+            size_t cols = init.begin()->size();
+            if (rows != cols) {
+                throw std::invalid_argument("Matrix initializer list must be square!\n");
+            }
+            for (const auto& row: init) {
+                if (row.size() != cols) {
+                    throw std::invalid_argument("Rows for initializer list must be of equal lengths!\n");
+                }
+            }
+            size = init.size();
+            data = new T* [rows];
+            for (size_t i = 0; i < size; i++)
+            {
+                data[i] = new T[size];
+            }
+            size_t i = 0;
+            for (const auto &row : init)
+            {
+                size_t j = 0;
+                for (const auto &val : row)
+                    data[i][j++] = val;
+                ++i;
             }
         }
 
