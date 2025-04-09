@@ -2,7 +2,7 @@
 Programmer: Connor Fricke (cd.fricke23@gmail.com)
 File: Matrix.h
 Latest Revision: 22-Feb-2024
-Synopsis: Header File for matrix class and routines
+Synopsis: Header and implementation file for templated matrix class and member routines
 */
 
 #ifndef MATRIX_H
