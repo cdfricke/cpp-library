@@ -16,30 +16,35 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename T>
     class Matrix {
         T** data;
-        size_t size;
+        size_t I, J;
         // Memory management
-        T** allocate(const size_t n);
-        void deallocate(T** del, const size_t n);
+        T** allocate(const size_t I, const size_t J);
+        void deallocate(T** del, const size_t I);
 
         public:
         // Constructors
             Matrix();
             Matrix(const size_t n);
+            Matrix(const size_t I, const size_t J);
             Matrix(const Matrix<T> &A);
+            Matrix(Matrix<T>&& A);
             Matrix(std::initializer_list<std::initializer_list<T>> init);
             ~Matrix();
         // IO
-            void show();
+            void show() const;
             template <typename U> 
             friend std::ostream& operator<<(std::ostream& out, Matrix<U>& A);
         // ACCESSORS
             T at(const size_t i, const size_t j) const;
-            size_t getSize() const;
+            size_t rows() const;
+            size_t cols() const;
         // MUTATORS
             void set(const size_t i, const size_t j, const T& val);
-            void resize(const size_t n);
+            void resize(const size_t I, const size_t J);
             void clear();
         // OPERATORS
+            Matrix<T>& operator=(const Matrix<T>& A);
+            Matrix<T>& operator=(Matrix<T>&& A);
             template <typename U>
             friend Matrix<U> operator+(const Matrix<U>& A, const Matrix<U>& B);
             template <typename U>
@@ -55,13 +60,13 @@ Synopsis: Header and implementation file for templated matrix class and member r
 
     // MEMORY MANAGEMENT
     template <typename T>
-    T** Matrix<T>::allocate(const size_t n)
+    T** Matrix<T>::allocate(const size_t I, const size_t J)
     {
-        T** newData = new T *[n];
-        for (size_t i = 0; i < n; i++)
+        T** newData = new T* [I];
+        for (size_t i = 0; i < I; i++)
         {
-            newData[i] = new T[n];
-            for (size_t j = 0; j < n; j++)
+            newData[i] = new T[J];
+            for (size_t j = 0; j < J; j++)
             {
                 newData[i][j] = (T)0;
             }
@@ -70,9 +75,9 @@ Synopsis: Header and implementation file for templated matrix class and member r
     }
 
     template <typename T>
-    void Matrix<T>::deallocate(T** del, const size_t n)
+    void Matrix<T>::deallocate(T** del, const size_t I)
     {
-        for (size_t i = 0; i < n; i++)
+        for (size_t i = 0; i < I; i++)
         {
             delete[] del[i];
         }
@@ -83,45 +88,72 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename T>
     Matrix<T>::Matrix()
     {
-        this->size = 3;
-        this->data = allocate(3);
+        std::cout << "[DEFAULT CONSTRUCTOR]\n";
+        this->I = 3;
+        this->J = 3;
+        this->data = allocate(3, 3);
     }
 
     template <typename T>
     Matrix<T>::Matrix(const size_t n)
     {
-        this->size = n;
-        this->data = allocate(n);
+        std::cout << "[SQUARE CONSTRUCTOR]\n";
+        this->I = n;
+        this->J = n;
+        this->data = allocate(n, n);
+    }
+
+    template<typename T>
+    Matrix<T>::Matrix(const size_t I, const size_t J) {
+        std::cout << "[RECTANGULAR CONSTRUCTOR]\n";
+        this->I = I;
+        this->J = J;
+        this->data = allocate(I, J);
     }
 
     template <typename T>
     Matrix<T>::Matrix(const Matrix<T> &A)
     {
-        this->data = allocate(A.size);
-        this->size = A.size;
-        for (size_t i = 0; i < A.size; i++)
+        std::cout << "[COPY CONSTRUCTOR]\n";
+        this->data = allocate(A.I, A.J);
+        this->I = A.I;
+        this->J = A.J;
+        for (size_t i = 0; i < A.I; i++)
         {
-            for (size_t j = 0; j < A.size; j++)
+            for (size_t j = 0; j < A.J; j++)
             {
                 this->data[i][j] = A.data[i][j];
             }
         }
     }
 
+    template <typename U>
+    Matrix<U>::Matrix(Matrix<U>&& A)
+    {
+        std::cout << "[MOVE CONSTRUCTOR]\n";
+        // Steal the data
+        this->data = A.data;
+        this->I = A.I;
+        this->J = A.J;
+
+        // Disconnect A ownership
+        A.data = nullptr;
+        A.I = 0;
+        A.J = 0;
+    }
+
     template <typename T>
     Matrix<T>::Matrix(std::initializer_list<std::initializer_list<T>> init) {
-        size_t rows = init.size();
-        size_t cols = init.begin()->size();
-        if (rows != cols) {
-            throw std::invalid_argument("Matrix initializer list must be square!\n");
-        }
         for (const auto& row: init) {
-            if (row.size() != cols) {
-                throw std::invalid_argument("Rows for initializer list must be of equal lengths!\n");
+            if (row.size() != init.begin()->size()) {
+                std::cerr << "ERROR: Rows of initializer list must be of equal lengths!\n";
+                Matrix();
             }
         }
-        this->size = init.size();
-        this->data = allocate(this->size);
+
+        this->I = init.size();
+        this->J = init.begin()->size();
+        this->data = allocate(this->I, this->J);
         size_t i = 0;
         for (const auto &row : init)
         {
@@ -135,22 +167,23 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename T>
     Matrix<T>::~Matrix()
     {
-        deallocate(this->data, this->size);
-        this->size = 0;
+        deallocate(this->data, this->I);
+        this->I = 0;
+        this->J = 0;
     }
 
     // IO
     template <typename T>
-    void Matrix<T>::show()
+    void Matrix<T>::show() const
     {
-        for (size_t i = 0; i < this->size; i++)
+        for (size_t i = 0; i < this->I; i++)
         {
             std::cout << '[';
-            for (size_t j = 0; j < this->size - 1; j++)
+            for (size_t j = 0; j < this->J - 1; j++)
             {
                 std::cout << this->data[i][j] << ',' << ' ';
             }
-            std::cout << this->data[i][size - 1];
+            std::cout << this->data[i][this->J - 1];
             std::cout << ']' << '\n';
         }
     }
@@ -159,17 +192,17 @@ Synopsis: Header and implementation file for templated matrix class and member r
     std::ostream &operator<<(std::ostream &out, Matrix<U> &A)
     {
         out << '[';
-        for (size_t i = 0; i < A.size; i++)
+        for (size_t i = 0; i < A.I; i++)
         {
             out << '[';
-            for (size_t j = 0; j < A.size - 1; j++)
+            for (size_t j = 0; j < A.J - 1; j++)
             {
                 out << A.data[i][j] << ',' << ' ';
             }
-            if (i != A.size - 1)
-                out << A.data[i][A.size - 1] << ']' << ',';
+            if (i != A.J - 1)
+                out << A.data[i][A.J - 1] << ']' << ',';
             else
-                out << A.data[i][A.size - 1] << ']';
+                out << A.data[i][A.J - 1] << ']';
         }
         out << ']' << '\n';
         return out;
@@ -177,16 +210,21 @@ Synopsis: Header and implementation file for templated matrix class and member r
 
     // ACCESSORS
     template<typename T>
-    size_t Matrix<T>::getSize() const
+    size_t Matrix<T>::rows() const
     {
-        return this->size;
+        return this->I;
+    }
+    template<typename T>
+    size_t Matrix<T>::cols() const
+    {
+        return this->J;
     }
 
     template <typename T>
     T Matrix<T>::at(const size_t i, const size_t j) const {
-        if (i > this->size || j > this->size) {
+        if (i > (this->I - 1) || j > (this->J - 1)) {
             std::cerr << "ERROR: Out of range [at()]\n";
-            return T(-1);
+            return T(0);
         }
         return this->data[i][j];
     }
@@ -195,7 +233,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename T>
     void Matrix<T>::set(const size_t i, const size_t j, const T& val)
     {
-        if (i > this->size || j > this->size) {
+        if (i > (this->I - 1) || j > (this->J - 1)) {
             std::cerr << "ERROR: Out of range! [set()]\n";
             return;
         }
@@ -203,42 +241,89 @@ Synopsis: Header and implementation file for templated matrix class and member r
     }
 
     template <typename T>
-    void Matrix<T>::resize(const size_t n) {
-        size_t copy_lim = (n < this->size) ? n : this->size;
+    void Matrix<T>::resize(const size_t I, const size_t J) {
+        size_t copy_lim_rows = (I < this->I) ? I : this->I;
+        size_t copy_lim_cols = (J < this->J) ? J : this->J;
 
-        T** newData = allocate(n);
-        for (size_t i = 0; i < copy_lim; i++)
+        T** newData = allocate(I, J);
+        for (size_t i = 0; i < copy_lim_rows; i++)
         {
-            for (size_t j = 0; j < copy_lim; j++) {
+            for (size_t j = 0; j < copy_lim_cols; j++) {
                 newData[i][j] = this->data[i][j];
             }
         }
-        deallocate(this->data, this->size); // delete old array
-        this->data = newData;               // replace with new array
-        this->size = n;
+        deallocate(this->data, this->I); // delete old array
+        this->I = I;
+        this->J = J;
+        this->data = newData;            // replace with new array
     }
 
     template<typename T>
     void Matrix<T>::clear()
     {
-        for (size_t i = 0; i < this->size; i++) {
-            for (size_t j = 0; j < this->size; j++) {
-                this->data[i][j] = (T)0;
+        for (size_t i = 0; i < this->I; i++) {
+            for (size_t j = 0; j < this->J; j++) {
+                this->data[i][j] = T(0);
             }
         }
     }
 
     // OPERATORS
     template <typename U>
+    Matrix<U>& Matrix<U>::operator=(const Matrix<U>& A)
+    {
+        std::cout << "[COPY ASSIGNMENT]\n";
+        if (this == &A) {
+            return *this;
+        }
+
+        deallocate(this->data, this->I);
+        this->I = A.I;
+        this->J = A.J;
+        this->data = allocate(this->I, this->J);
+
+        for (size_t i = 0; i < this->I; i++) {
+            for (size_t j = 0; j < this->J; j++) {
+                this->data[i][j] = A.data[i][j];
+            }
+        }
+        return *this;
+    }
+
+    template <typename U>
+    Matrix<U>& Matrix<U>::operator=(Matrix<U>&& A) 
+    {
+        std::cout << "[MOVE ASSIGNMENT]\n";
+        if (this == &A) {
+            return *this;
+        }
+
+        // clean up
+        deallocate(this->data, this->I);
+
+        // steal data from A
+        this->data = A.data;
+        this->I = A.I;
+        this->J = A.J;
+
+        // disconnect A from ownership
+        A.data = nullptr;
+        A.I = 0;
+        A.J = 0;
+
+        return *this;
+    }
+
+    template <typename U>
     Matrix<U> operator+(const Matrix<U>& A, const Matrix<U>& B) 
     {
-        if (A.size != B.size) {
+        if ((A.I != B.I) || (A.J != B.J)) {
             std::cerr << "ERROR: Matrices must be the same shape for addition! [operator+]\n";
             return A;
         }
-        Matrix<U> sum(A.size);
-        for (size_t i = 0; i < A.size; i++) {
-            for (size_t j = 0; j < A.size; j++) {
+        Matrix<U> sum(A.I, A.J);
+        for (size_t i = 0; i < A.I; i++) {
+            for (size_t j = 0; j < A.J; j++) {
                 sum.set(i, j, A.at(i,j) + B.at(i, j));
             }
         }
@@ -248,9 +333,9 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename U>
     Matrix<U> operator*(const Matrix<U>& A, const U& C) 
     {
-        Matrix<U> product(A.size);
-        for (size_t i = 0; i < A.size; i++) {
-            for (size_t j = 0; j < A.size; j++) {
+        Matrix<U> product(A.I, A.J);
+        for (size_t i = 0; i < A.I; i++) {
+            for (size_t j = 0; j < A.J; j++) {
                 product.set(i, j, C * A.at(i,j));
             }
         }
@@ -260,9 +345,9 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename U>
     Matrix<U> operator*(const U& C, const Matrix<U>& A) 
     {
-        Matrix<U> product(A.size);
-        for (size_t i = 0; i < A.size; i++) {
-            for (size_t j = 0; j < A.size; j++) {
+        Matrix<U> product(A.I, A.J);
+        for (size_t i = 0; i < A.I; i++) {
+            for (size_t j = 0; j < A.J; j++) {
                 product.set(i, j, C * A.at(i,j));
             }
         }
