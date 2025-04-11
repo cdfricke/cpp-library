@@ -1,7 +1,7 @@
 /*
 Programmer: Connor Fricke (cd.fricke23@gmail.com)
 File: Matrix.h
-Latest Revision: 22-Feb-2024
+Latest Revision: 10-Apr-2025
 Synopsis: Header and implementation file for templated matrix class and member routines
 */
 
@@ -10,9 +10,9 @@ Synopsis: Header and implementation file for templated matrix class and member r
 
     #include <cstdlib>
     #include <iostream>
+    #include "Vector.h"
 
     // CLASS DEFINITION AND MEMBER FUNCTION DECLARATIONS
-    // TODO: Upgrade to allow for non-square matrices
     template <typename T>
     class Matrix {
         T** data;
@@ -22,20 +22,22 @@ Synopsis: Header and implementation file for templated matrix class and member r
         void deallocate(T** del, const size_t I);
 
         public:
-        // Constructors
-            Matrix();
-            Matrix(const size_t n);
-            Matrix(const size_t I, const size_t J);
-            Matrix(const Matrix<T> &A);
-            Matrix(Matrix<T>&& A);
-            Matrix(std::initializer_list<std::initializer_list<T>> init);
-            ~Matrix();
+        // CONSTRUCTORS
+            Matrix();                               // default
+            Matrix(const size_t n);                 // square sized
+            Matrix(const size_t I, const size_t J); // rectangular sized
+            Matrix(const Matrix<T> &A);             // copy
+            Matrix(Matrix<T>&& A);                  // move
+            Matrix(std::initializer_list<std::initializer_list<T>> init);   // easy initializer
+            ~Matrix();                              // destructor
         // IO
             void show() const;
             template <typename U> 
             friend std::ostream& operator<<(std::ostream& out, Matrix<U>& A);
         // ACCESSORS
             T at(const size_t i, const size_t j) const;
+            Vector<T> getRow(const size_t i) const;
+            Vector<T> getCol(const size_t j) const;
             size_t rows() const;
             size_t cols() const;
         // MUTATORS
@@ -229,6 +231,26 @@ Synopsis: Header and implementation file for templated matrix class and member r
         return this->data[i][j];
     }
 
+    template <typename T>
+    Vector<T> Matrix<T>::getRow(const size_t i) const
+    {
+        if (i > (this->I - 1)) {
+            std::cerr << "ERROR: Out of range! [getRow()]\n";
+            return Vector<T>(0, true);
+        }
+        Vector<T> row(this->J, true);
+        for (size_t j = 0; j < this->J; j++) {
+            row[j] = data[i][j];
+        }
+        return row;
+    }
+
+    template <typename T>
+    Vector<T> Matrix<T>::getCol(const size_t j) const
+    {
+
+    }
+
     // MUTATORS
     template <typename T>
     void Matrix<T>::set(const size_t i, const size_t j, const T& val)
@@ -357,7 +379,18 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename U>
     Matrix<U> operator*(const Matrix<U>& A, const Matrix<U>& B) 
     {
-        // TODO: IMPLEMENT
+        if (A.J != B.I) {
+            std::cerr << "Invalid dimensions for matrix multiplication! [operator*]\n";
+            return A;
+        }
+
+        Matrix<U> product(A.I, B.J);
+        for (size_t i = 0; i < A.I; i++) {
+            for (size_t j = 0; j < B.J; j++) {
+                T element;
+                element = 
+            }
+        }
     }
 
 
