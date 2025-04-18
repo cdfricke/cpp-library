@@ -8,9 +8,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
 #ifndef MATRIX_H
 #define MATRIX_H
 
-    #include <cstdlib>
-    #include <iostream>
-    #include "Vector.h"
+    #include "Vector.h" // dependency
 
     // CLASS DEFINITION AND MEMBER FUNCTION DECLARATIONS
     template <typename T>
@@ -28,7 +26,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
             Matrix(const size_t I, const size_t J); // rectangular sized
             Matrix(const Matrix<T> &A);             // copy
             Matrix(Matrix<T>&& A);                  // move
-            Matrix(std::initializer_list<std::initializer_list<T>> init);   // easy initializer
+            Matrix(const std::initializer_list<std::initializer_list<T>> init);
             ~Matrix();                              // destructor
         // IO
             void show() const;
@@ -64,7 +62,12 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename T>
     T** Matrix<T>::allocate(const size_t I, const size_t J)
     {
-        T** newData = new T* [I];
+        if (I == 0 || J == 0)
+        {
+            std::cerr << "WARNING: No memory allocated for empty matrix.\n";
+            return nullptr;
+        }
+        T** newData = new T*[I];
         for (size_t i = 0; i < I; i++)
         {
             newData[i] = new T[J];
@@ -79,35 +82,37 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename T>
     void Matrix<T>::deallocate(T** del, const size_t I)
     {
+        if (!del) {return;} // safeguard
+        // free up memory
         for (size_t i = 0; i < I; i++)
         {
             delete[] del[i];
         }
         delete[] del;
+
+        if (del == this->data) {this->data = nullptr;} 
     }
 
     // CONSTRUCTORS
     template <typename T>
     Matrix<T>::Matrix()
     {
-        std::cout << "[DEFAULT CONSTRUCTOR]\n";
-        this->I = 3;
-        this->J = 3;
-        this->data = allocate(3, 3);
+        this->I = 0;
+        this->J = 0;
+        this->data = allocate(0, 0);
     }
 
     template <typename T>
-    Matrix<T>::Matrix(const size_t n)
+    Matrix<T>::Matrix(const size_t N)
     {
-        std::cout << "[SQUARE CONSTRUCTOR]\n";
-        this->I = n;
-        this->J = n;
-        this->data = allocate(n, n);
+        this->I = N;
+        this->J = N;
+        this->data = allocate(N, N);
     }
 
     template<typename T>
-    Matrix<T>::Matrix(const size_t I, const size_t J) {
-        std::cout << "[RECTANGULAR CONSTRUCTOR]\n";
+    Matrix<T>::Matrix(const size_t I, const size_t J) 
+    {
         this->I = I;
         this->J = J;
         this->data = allocate(I, J);
@@ -116,7 +121,6 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename T>
     Matrix<T>::Matrix(const Matrix<T> &A)
     {
-        std::cout << "[COPY CONSTRUCTOR]\n";
         this->data = allocate(A.I, A.J);
         this->I = A.I;
         this->J = A.J;
@@ -132,7 +136,6 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename U>
     Matrix<U>::Matrix(Matrix<U>&& A)
     {
-        std::cout << "[MOVE CONSTRUCTOR]\n";
         // Steal the data
         this->data = A.data;
         this->I = A.I;
@@ -140,8 +143,6 @@ Synopsis: Header and implementation file for templated matrix class and member r
 
         // Disconnect A ownership
         A.data = nullptr;
-        A.I = 0;
-        A.J = 0;
     }
 
     template <typename T>
@@ -170,14 +171,18 @@ Synopsis: Header and implementation file for templated matrix class and member r
     Matrix<T>::~Matrix()
     {
         deallocate(this->data, this->I);
-        this->I = 0;
-        this->J = 0;
     }
 
     // IO
     template <typename T>
     void Matrix<T>::show() const
     {
+        if (!this->data) { 
+            // empty matrix
+            std::cout << "[[]]\n"; 
+            return;
+        } 
+
         for (size_t i = 0; i < this->I; i++)
         {
             std::cout << '[';
@@ -384,13 +389,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
             return A;
         }
 
-        Matrix<U> product(A.I, B.J);
-        for (size_t i = 0; i < A.I; i++) {
-            for (size_t j = 0; j < B.J; j++) {
-                T element;
-                element = 
-            }
-        }
+        // TODO: IMPLEMENT
     }
 
 
