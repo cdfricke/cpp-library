@@ -37,7 +37,7 @@ Synopsis: Header and implementation file for templated Vector class and member r
         friend std::ostream &operator<<(std::ostream &out, Vector<U> &V);
     // ACCESSORS
         T at(const size_t n) const;
-        int size() const;
+        size_t size() const;
         bool row() const;
     // MUTATORS
         void set(const size_t n, const T &val);
@@ -119,7 +119,7 @@ Synopsis: Header and implementation file for templated Vector class and member r
     Vector<T>::Vector(const Vector<T>&& V)
     {
         // Steal the data
-        this-N = V.N;
+        this->N = V.N;
         this->isRow = V.isRow;
         this->data = V.data;
 
@@ -148,12 +148,13 @@ Synopsis: Header and implementation file for templated Vector class and member r
         deallocate(this->data);
     }
 
+    // IO
     template <typename T>
     void Vector<T>::show() const
     {
-        if (this->N == 0) {
+        if (!this->data) {
             // empty vector
-            std::cout << "[ ]\n";
+            std::cout << "[ ]" << std::endl;
             return;
         }
         std::cout << '[';
@@ -162,7 +163,93 @@ Synopsis: Header and implementation file for templated Vector class and member r
             std::cout << this->data[i] << ',' << ' ';
         }
         std::cout << this->data[this->N - 1];
-        std::cout << ']' << '\n';
+        std::cout << ']' << std::endl;
+    }
+
+    template <typename U>
+    std::ostream& operator<<(std::ostream& out, Vector<U>& V)
+    {
+        if (!V.data) {
+            // empty vector
+            out << "[ ]";
+            return out;
+        }
+        out << '[';
+        for (size_t i = 0; i < V.N - 1; i++)
+        {
+            out << V.data[i] << ',' << ' ';
+        }
+        out << V.data[V.N - 1];
+        out << ']';
+        return out;
+    }
+
+    // ACCESSORS
+    template <typename T>
+    T Vector<T>::at(const size_t n) const {
+        if (n > this->N - 1) {
+            std::cerr << "ERROR: Out of range [at()]\n";
+            return (T)0;
+        }
+        return this->data[n];
+    }
+
+    template <typename T>
+    size_t Vector<T>::size() const {return this->N;}
+
+    template <typename T>
+    bool Vector<T>::row() const {return this->isRow;}
+
+    // MUTATORS
+    template <typename T>
+    void Vector<T>::set(const size_t n, const T &val)
+    {
+        if (n > this->N - 1) {
+            std::cerr << "ERROR: Out of range! [set()]\n";
+            return;
+        }
+        this->data[n] = val;
+    }
+    
+    template <typename T>
+    void Vector<T>::resize(const size_t N)
+    {
+        size_t copy_lim = (N < this->N) ? N : this->N;
+
+        T* newData = allocate(N);
+        for (size_t i = 0; i < copy_lim; i++) {
+            newData[i] = this->data[i];
+        }
+        deallocate(this->data);
+        this->N = N;
+        this->data = newData;
+    }
+        
+    template <typename T>
+    void Vector<T>::clear()
+    {
+        for (size_t i = 0; i < this->N; i++) {
+            this->data[i] = (T)0;
+        }
+    }
+
+    // OPERATORS
+    template<typename U>
+    Vector<U>& Vector<U>::operator=(const Vector<U> &V)
+    {
+
+    }
+
+    template <typename U>
+    Vector<U>& Vector<U>::operator=(Vector<U>&& V)
+    {
+
+    }
+        
+    template <typename U>
+    Vector<U> operator+(const Vector<U>& A, const Vector<U>& B)
+    {
+        
     }
 
 #endif

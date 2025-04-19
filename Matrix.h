@@ -22,7 +22,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
         public:
         // CONSTRUCTORS
             Matrix();                               // default
-            Matrix(const size_t n);                 // square sized
+            Matrix(const size_t N);                 // square sized
             Matrix(const size_t I, const size_t J); // rectangular sized
             Matrix(const Matrix<T> &A);             // copy
             Matrix(Matrix<T>&& A);                  // move
@@ -179,7 +179,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
     {
         if (!this->data) { 
             // empty matrix
-            std::cout << "[[]]\n"; 
+            std::cout << "[[ ]]" << std::endl; 
             return;
         } 
 
@@ -191,13 +191,18 @@ Synopsis: Header and implementation file for templated matrix class and member r
                 std::cout << this->data[i][j] << ',' << ' ';
             }
             std::cout << this->data[i][this->J - 1];
-            std::cout << ']' << '\n';
+            std::cout << ']' << std::endl;
         }
     }
 
     template <typename U>
     std::ostream &operator<<(std::ostream &out, Matrix<U> &A)
     {
+        if (!A.data) { 
+            // empty matrix
+            out << "[[ ]]"; 
+            return out;
+        } 
         out << '[';
         for (size_t i = 0; i < A.I; i++)
         {
@@ -211,7 +216,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
             else
                 out << A.data[i][A.J - 1] << ']';
         }
-        out << ']' << '\n';
+        out << ']';
         return out;
     }
 
@@ -231,7 +236,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
     T Matrix<T>::at(const size_t i, const size_t j) const {
         if (i > (this->I - 1) || j > (this->J - 1)) {
             std::cerr << "ERROR: Out of range [at()]\n";
-            return T(0);
+            return (T)0;
         }
         return this->data[i][j];
     }
@@ -253,7 +258,15 @@ Synopsis: Header and implementation file for templated matrix class and member r
     template <typename T>
     Vector<T> Matrix<T>::getCol(const size_t j) const
     {
-
+        if (j > (this->J - 1)) {
+            std::cerr << "ERROR: Out of range! [getCol()]\n";
+            return Vector<T>(0, false);
+        }
+        Vector<T> col(this->I, false);
+        for (size_t i = 0; i < this->I; i++) {
+            col[i] = data[i][j];
+        }
+        return col;
     }
 
     // MUTATORS
@@ -290,7 +303,7 @@ Synopsis: Header and implementation file for templated matrix class and member r
     {
         for (size_t i = 0; i < this->I; i++) {
             for (size_t j = 0; j < this->J; j++) {
-                this->data[i][j] = T(0);
+                this->data[i][j] = (T)0;
             }
         }
     }

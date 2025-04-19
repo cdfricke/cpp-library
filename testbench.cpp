@@ -8,28 +8,17 @@ void checkState(const Matrix<U>& A) {
 
 int main() {
 
-    Matrix<int> A = {{1, 2, 3, 2}, {1, 2, 3, 1}, {2, 3, 4, 8}};
-    Matrix<int> B;
-    checkState(A);
-    checkState(B);
+    Vector<double> test1(5);
+    Vector<double> test2(test1);
+    Vector<double> test3;
 
-    Matrix<int> sum = A + B;
-    checkState(sum);
+    test1.show();
+    test2.show();
+    test3.show();
 
-    A.clear();
-    checkState(A);
-
-    A.set(2, 2, 10.3);
-    checkState(A);
-
-    Matrix<double> C = {{1.0, 3.0, 5.0}, {2.0, 4.0, 6.0}, {3.0, 5.0, 7.0}};
-    checkState(C*5.0);
-
-    C.resize(3, 4);
-    checkState(C);
-
-    C = 5.0 * C;
-    checkState(C);
+    std::cout << test1 << '\n';
+    std::cout << test2 << '\n';
+    std::cout << test3 << std::endl;
 
     return 0;
 }
